@@ -1,5 +1,6 @@
-import * as fs from 'fs';
-   import * as path from 'path';
+ import * as fs from 'fs';
+     import * as path from 'path';
+     import moment from 'moment';
 
    interface Student {
      id: string;
@@ -43,32 +44,36 @@ export class AssessmentReportGenerator {
        private questions: Question[];
        private responses: StudentResponse[];
 
-      constructor() {
-  const dataDir = path.resolve(__dirname, '..', 'data');
-  this.students = JSON.parse(fs.readFileSync(path.join(dataDir, 'students.json'), 'utf-8'));
-  this.assessments = JSON.parse(fs.readFileSync(path.join(dataDir, 'assessments.json'), 'utf-8'));
-  this.questions = JSON.parse(fs.readFileSync(path.join(dataDir, 'questions.json'), 'utf-8'));
-  this.responses = JSON.parse(fs.readFileSync(path.join(dataDir, 'student-responses.json'), 'utf-8'));
-}
-
-
+       constructor() {
+         const dataDir = path.resolve(__dirname, '..', 'data');
+         this.students = JSON.parse(fs.readFileSync(path.join(dataDir, 'students.json'), 'utf-8'));
+         this.assessments = JSON.parse(fs.readFileSync(path.join(dataDir, 'assessments.json'), 'utf-8'));
+         this.questions = JSON.parse(fs.readFileSync(path.join(dataDir, 'questions.json'), 'utf-8'));
+         this.responses = JSON.parse(fs.readFileSync(path.join(dataDir, 'student-responses.json'), 'utf-8'));
+       }
 
        private getStudentName(studentId: string): string {
          const student = this.students.find(s => s.id === studentId);
          return student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
        }
 
-       private formatDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleString('en-US', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  });
-}
+       private formatDate(dateStr?: string): string {
+         if (!dateStr) {
+           return 'Date not available';
+         }
+         const date = moment(dateStr, 'DD/MM/YYYY HH:mm:ss', true);
+         if (!date.isValid()) {
+           return 'Invalid Date';
+         }
+         return date.toDate().toLocaleString('en-US', {
+           day: 'numeric',
+           month: 'long',
+           year: 'numeric',
+           hour: 'numeric',
+           minute: '2-digit',
+           hour12: true
+         });
+       }
 
        generateDiagnosticReport(studentId: string): string {
          const latestResponse = this.responses

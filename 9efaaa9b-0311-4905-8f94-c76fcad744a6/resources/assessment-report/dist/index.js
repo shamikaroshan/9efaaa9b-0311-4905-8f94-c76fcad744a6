@@ -32,10 +32,14 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AssessmentReportGenerator = void 0;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const moment_1 = __importDefault(require("moment"));
 class AssessmentReportGenerator {
     constructor() {
         const dataDir = path.resolve(__dirname, '..', 'data');
@@ -44,14 +48,19 @@ class AssessmentReportGenerator {
         this.questions = JSON.parse(fs.readFileSync(path.join(dataDir, 'questions.json'), 'utf-8'));
         this.responses = JSON.parse(fs.readFileSync(path.join(dataDir, 'student-responses.json'), 'utf-8'));
     }
-
     getStudentName(studentId) {
         const student = this.students.find(s => s.id === studentId);
         return student ? `${student.firstName} ${student.lastName}` : 'Unknown Student';
     }
     formatDate(dateStr) {
-        const date = new Date(dateStr);
-        return date.toLocaleString('en-US', {
+        if (!dateStr) {
+            return 'Date not available';
+        }
+        const date = (0, moment_1.default)(dateStr, 'DD/MM/YYYY HH:mm:ss', true);
+        if (!date.isValid()) {
+            return 'Invalid Date';
+        }
+        return date.toDate().toLocaleString('en-US', {
             day: 'numeric',
             month: 'long',
             year: 'numeric',
